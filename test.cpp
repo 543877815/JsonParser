@@ -4,6 +4,7 @@
 #include <memory>
 #include <functional>
 
+
 TEST(json_parser, init)
 {
 	EXPECT_NO_THROW(json_parser::JsonParser());
@@ -14,17 +15,19 @@ TEST(json_parser, load_file)
 	EXPECT_NO_THROW(json_parser::JsonParser("data.json"));
 }
 
-void invoke_test(std::function<json_parser::PARSE_STATUS(const std::string&, size_t&)> func, const std::string& str, json_parser::PARSE_STATUS status) {
+void invoke_test(std::function<json_parser::PARSE_STATUS(const std::string&, size_t&, std::shared_ptr<json_parser::JsonValueBase>&)> func, const std::string& str, json_parser::PARSE_STATUS status, json_parser::JSON_VALUE_TYPE value_type = json_parser::UNDEFINED_VALUE) {
 	size_t idx = 0;
-	auto res = func(str, idx);
+	std::shared_ptr<json_parser::JsonValueBase> base_value_ptr = std::make_shared<json_parser::JsonValue<json_parser::UNDEFINED_VALUE>>();
+	auto res = func(str, idx, base_value_ptr);
 	EXPECT_EQ(res, status);
+	EXPECT_EQ(base_value_ptr->GetType(), value_type);
 };
 
 TEST(json_parser, test_parse)
 {
-	invoke_test(json_parser::JsonParser::Parse, "null", json_parser::PARSE_OK);
-	invoke_test(json_parser::JsonParser::Parse, "true", json_parser::PARSE_OK);
-	invoke_test(json_parser::JsonParser::Parse, "false", json_parser::PARSE_OK);
+	invoke_test(json_parser::JsonParser::Parse, "null", json_parser::PARSE_OK, json_parser::NULL_VALUE);
+	invoke_test(json_parser::JsonParser::Parse, "true", json_parser::PARSE_OK, json_parser::TRUE_VALUE);
+	invoke_test(json_parser::JsonParser::Parse, "false", json_parser::PARSE_OK, json_parser::FALSE_VALUE);
 }
 
 TEST(json_parser, test_parse_expect_value)

@@ -10,7 +10,7 @@ public:
 	JsonParser(const std::string& filename);
 	~JsonParser() = default;
 
-	static PARSE_STATUS Parse(const std::string& str, size_t& start_idx)
+	static PARSE_STATUS Parse(const std::string& str, size_t& start_idx, std::shared_ptr<JsonValueBase>& ret_ptr)
 	{
 		PARSE_STATUS res;
 		JsonParser::ParseWhiteSpace(str, start_idx);
@@ -18,12 +18,14 @@ public:
 		if ((res = JsonParser::ParseValue(str, start_idx, base_value_ptr)) == PARSE_OK) {
 			JsonParser::ParseWhiteSpace(str, start_idx);
 			if (str.size() != start_idx && str[start_idx] != ',' && str[start_idx] != '\n')
-				res = PARSE_ROOT_NOT_SINGULAR;
+				return PARSE_ROOT_NOT_SINGULAR;
 		}
+		if (base_value_ptr)
+			ret_ptr = base_value_ptr;
 		return res;
 	}
 
-	static PARSE_STATUS ParseValue(const std::string& str, size_t& idx, std::shared_ptr<JsonValueBase> base_value_ptr)
+	static PARSE_STATUS ParseValue(const std::string& str, size_t& idx, std::shared_ptr<JsonValueBase>& base_value_ptr)
 	{
 		if (idx == str.size())
 			return PARSE_EXPECT_VALUE;
@@ -36,7 +38,7 @@ public:
 		}
 	}
 
-	static PARSE_STATUS ParseLiteral(const std::string& str, size_t& start_idx, const std::string& literal, JSON_VALUE_TYPE value_type, std::shared_ptr<JsonValueBase> base_value_ptr)
+	static PARSE_STATUS ParseLiteral(const std::string& str, size_t& start_idx, const std::string& literal, JSON_VALUE_TYPE value_type, std::shared_ptr<JsonValueBase>& base_value_ptr)
 	{
 		if (start_idx + literal.size() > str.size())
 			return PARSE_INVALID_VALUE;
