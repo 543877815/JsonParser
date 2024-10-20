@@ -4,15 +4,15 @@
 JSON_PARSER_BEGIN
 typedef enum
 {
-	UNDEFINED,
-	JSON_NULL,
-	JSON_FALSE,
-	JSON_TRUE,
-	JSON_NUMBER,
-	JSON_STRING,
-	JSON_ARRAY,
-	JSON_OBJECT
-} VALUE_TYPE;
+	UNDEFINED_VALUE,
+	NULL_VALUE,
+	FALSE_VALUE,
+	TRUE_VALUE,
+	NUMBER_VALUE,
+	STRING_VALUE,
+	ARRAY_VALUE,
+	OBJECT_VALUE
+} JSON_VALUE_TYPE;
 
 typedef enum
 {
@@ -26,55 +26,67 @@ typedef enum
 class JsonValueBase {
 public:
 	virtual ~JsonValueBase() {}
-	virtual VALUE_TYPE GetType() const = 0;
+	virtual JSON_VALUE_TYPE GetType() const = 0;
 protected:
-	VALUE_TYPE m_type = VALUE_TYPE::UNDEFINED;
+	JSON_VALUE_TYPE m_type = UNDEFINED_VALUE;
 };
 
-template <VALUE_TYPE T>
+template <JSON_VALUE_TYPE T>
 class JsonValue : public JsonValueBase {
 public:
 	JsonValue() : m_type(T) {}
-	VALUE_TYPE GetType() const override {
+	JSON_VALUE_TYPE GetType() const override {
 		return m_type;
 	}
 protected:
-	VALUE_TYPE m_type;
+	JSON_VALUE_TYPE m_type;
 };
 
 template <>
-class JsonValue<JSON_NULL> : public JsonValueBase {
+class JsonValue<NULL_VALUE> : public JsonValueBase {
 public:
-	JsonValue() : m_type(VALUE_TYPE::JSON_NULL) {}
-	VALUE_TYPE GetType()  const override {
+	JsonValue() : m_type(NULL_VALUE) {}
+	JSON_VALUE_TYPE GetType()  const override {
 		return m_type;
 	}
 private:
-	VALUE_TYPE m_type = VALUE_TYPE::JSON_NULL;
+	JSON_VALUE_TYPE m_type;
 };
 
 template <>
-class JsonValue<JSON_TRUE> : public JsonValueBase {
+class JsonValue<TRUE_VALUE> : public JsonValueBase {
 public:
-	JsonValue() {}
-	VALUE_TYPE GetType() const override {
+	JsonValue() : m_type(TRUE_VALUE) {}
+	JSON_VALUE_TYPE GetType() const override {
 		return m_type;
 	}
 private:
-	VALUE_TYPE m_type = VALUE_TYPE::JSON_TRUE;
+	JSON_VALUE_TYPE m_type;
 };
 
 template <>
-class JsonValue<JSON_STRING> : public JsonValueBase {
+class JsonValue<FALSE_VALUE> : public JsonValueBase {
+public:
+	JsonValue() : m_type(FALSE_VALUE) {}
+	JSON_VALUE_TYPE GetType() const override {
+		return m_type;
+	}
+private:
+	JSON_VALUE_TYPE m_type;
+};
+
+
+template <>
+class JsonValue<STRING_VALUE> : public JsonValueBase {
 public:
 	JsonValue() = default;
 	JsonValue(std::string& data) : m_data(data) {}
-	VALUE_TYPE GetType() const override {
+	JSON_VALUE_TYPE GetType() const override {
 		return m_type;
 	}
 	std::string& GetData() { return m_data; }
 private:
-	VALUE_TYPE m_type = VALUE_TYPE::JSON_STRING;
+	JSON_VALUE_TYPE m_type = STRING_VALUE;
 	std::string m_data = "";
 };
 
