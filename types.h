@@ -21,14 +21,20 @@ typedef enum
 	PARSE_TO_IMPLEMENTE,
 	PARSE_EXPECT_VALUE,
 	PARSE_INVALID_VALUE,
-	PARSE_ROOT_NOT_SINGULAR
+	PARSE_ROOT_NOT_SINGULAR,
+	PARSE_NUMBER_TOO_BIG,
+	PARSE_MISS_QUOTATION_MARK,
+	PARSE_INVALID_STRING_ESCAPE,
+	PARSE_INVALID_STRING_CHAR,
+	PARSE_INVALID_UNICODE_HEX,
+	PARSE_INVALID_UNICODE_SURROGATE
 } PARSE_STATUS;
 
 using variant_type = std::variant<std::monostate, bool, double, std::string>;
 
 class JsonValueBase {
 public:
-	virtual ~JsonValueBase() {}
+	virtual ~JsonValueBase() = default;
 	virtual JSON_VALUE_TYPE GetType() const = 0;
 	virtual	variant_type GetVariantData() const = 0;
 protected:
@@ -38,7 +44,8 @@ protected:
 template <JSON_VALUE_TYPE T>
 class JsonValue : public JsonValueBase {
 public:
-	JsonValue() : m_type(T) {}
+	JsonValue() = default;
+	~JsonValue() = default;
 	JSON_VALUE_TYPE GetType() const override { return m_type; }
 	variant_type GetVariantData() const override { return std::monostate{}; }
 protected:
@@ -48,42 +55,47 @@ protected:
 template <>
 class JsonValue<NULL_VALUE> : public JsonValueBase {
 public:
-	JsonValue() : m_type(NULL_VALUE) {}
+	JsonValue() = default;
+	~JsonValue() = default;
 	JSON_VALUE_TYPE GetType()  const override { return m_type; }
 	variant_type GetVariantData() const override { return std::monostate{}; }
 private:
-	JSON_VALUE_TYPE m_type;
+	JSON_VALUE_TYPE m_type = NULL_VALUE;
 };
 
 template <>
 class JsonValue<TRUE_VALUE> : public JsonValueBase {
 public:
-	JsonValue() : m_type(TRUE_VALUE) {}
+	JsonValue() = default;
+	~JsonValue() = default;
 	JSON_VALUE_TYPE GetType() const override { return m_type; }
 	variant_type GetVariantData() const override { return true; };
 private:
-	JSON_VALUE_TYPE m_type;
+	JSON_VALUE_TYPE m_type = TRUE_VALUE;
 };
 
 template <>
 class JsonValue<FALSE_VALUE> : public JsonValueBase {
 public:
-	JsonValue() : m_type(FALSE_VALUE) {}
+	JsonValue() = default;
+	~JsonValue() = default;
 	JSON_VALUE_TYPE GetType() const override { return m_type; }
 	variant_type GetVariantData() const override { return false; };
 private:
-	JSON_VALUE_TYPE m_type;
+	JSON_VALUE_TYPE m_type = FALSE_VALUE;
 };
 
 template <>
 class JsonValue<NUMBER_VALUE> : public JsonValueBase {
 public:
-	JsonValue() : m_type(NUMBER_VALUE), m_value(0.0) {}
+	JsonValue() = default;
+	~JsonValue() = default;
+	JsonValue(double value) : m_value(value) {}
 	JSON_VALUE_TYPE GetType() const override { return m_type; }
 	variant_type GetVariantData() const override { return m_value; };
 private:
-	JSON_VALUE_TYPE m_type;
-	double m_value;
+	JSON_VALUE_TYPE m_type = NUMBER_VALUE;
+	double m_value = 0.0;
 };
 
 template <>
